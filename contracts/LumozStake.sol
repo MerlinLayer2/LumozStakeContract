@@ -84,15 +84,14 @@ contract LumozStake is OwnableUpgradeable {
         require(_amount >= ONE_MERL, "at least 1 MERL");
 
         address account = msg.sender;
-        IERC20(merlToken).transferFrom(account, address(this), _amount);
-
         userStakeAmount[account] += _amount;
         totalStakeAmount += _amount;
+
+        IERC20(merlToken).transferFrom(account, address(this), _amount);
 
         emit Stake(account, merlToken, _amount);
     }
 
-    //解质押，一次解除所有质押
     /**
     * @dev Unstake merl: unstake merl from contract.
     *
@@ -104,10 +103,10 @@ contract LumozStake is OwnableUpgradeable {
         uint256 amount = userStakeAmount[account];
         require(amount > 0, "account dost not stake");
 
-        IERC20(merlToken).transfer(msg.sender, amount);
-
         userStakeAmount[account] = 0;
         totalStakeAmount -= amount;
+
+        IERC20(merlToken).transfer(msg.sender, amount);
 
         emit Unstake(account, merlToken, amount);
     }
