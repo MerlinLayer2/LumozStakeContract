@@ -60,8 +60,7 @@ contract LumozStake is OwnableUpgradeable {
     *
     * - `_initialOwner`：the initial owner is set to the address provided by the deployer. This can
     *      later be changed with {transferOwnership}.
-    * - `_signer`: the sign address when you want to rent.
-    * - `_rentToken`: spend the rent token to rent.
+    * - `_merlToken`: spend the merl token to stake.
     */
     function initialize(
         address _initialOwner,
@@ -79,7 +78,7 @@ contract LumozStake is OwnableUpgradeable {
     * - `_amount`: stake the merl amount, at least 1 merl.
     *
     * Firstly, we transfer the specified amount from sender to this contract.
-    * Finally, we update account's amount and global total amount.
+    * And then, we update account's amount and global total amount.
     */
     function stake(uint256 _amount) external whenNotPaused nonReentrant {
         require(_amount >= ONE_MERL, "at least 1 MERL");
