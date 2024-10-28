@@ -115,7 +115,7 @@ contract LumozStake is OwnableUpgradeable {
         userStakeAmount[account] = 0;
         totalStakeAmount -= amount;
 
-        IERC20(merlToken).transfer(msg.sender, amount);
+        IERC20(merlToken).transfer(account, amount);
 
         emit Unstake(account, merlToken, amount);
     }
