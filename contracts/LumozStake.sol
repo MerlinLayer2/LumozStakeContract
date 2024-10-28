@@ -16,6 +16,8 @@ contract LumozStake is OwnableUpgradeable {
     address public pauseAdmin;
     uint256 private _nonReentrantStatus;
 
+    uint256 public deadline;
+
     event Stake(
         address msgSender,
         address token,
@@ -37,6 +39,12 @@ contract LumozStake is OwnableUpgradeable {
     event PauseEvent(
         address pauseAdmin,
         bool paused
+    );
+
+    event SetDeadLineEvent(
+        address adminSetter,
+        uint256 oldDeadline,
+        uint256 newDeadline
     );
 
     modifier onlyValidAddress(address addr) {
@@ -81,7 +89,8 @@ contract LumozStake is OwnableUpgradeable {
     * And then, we update account's amount and global total amount.
     */
     function stake(uint256 _amount) external whenNotPaused nonReentrant {
-        require(_amount >= ONE_MERL, "at least 1 MERL");
+        require(_amount >= ONE_MERL, "At least 1 MERL");
+        require(block.timestamp < deadline, "The staking activity is over");
 
         address account = msg.sender;
         userStakeAmount[account] += _amount;
@@ -101,19 +110,19 @@ contract LumozStake is OwnableUpgradeable {
     function unstake() external whenNotPaused nonReentrant {
         address account = msg.sender;
         uint256 amount = userStakeAmount[account];
-        require(amount > 0, "account dost not stake");
+        require(amount > 0, "Account dost not stake");
 
         userStakeAmount[account] = 0;
         totalStakeAmount -= amount;
 
-        IERC20(merlToken).transfer(msg.sender, amount);
+        IERC20(merlToken).transfer(account, amount);
 
         emit Unstake(account, merlToken, amount);
     }
 
     //Pause ...
     function setPauseAdmin(address _account) public onlyOwner {
-        require(_account != address (0), "invalid _account");
+        require(_account != address (0), "Invalid _account");
         address oldPauseAdmin = pauseAdmin;
         pauseAdmin = _account;
         emit PauseAdminChanged(msg.sender, oldPauseAdmin, pauseAdmin);
@@ -139,5 +148,15 @@ contract LumozStake is OwnableUpgradeable {
     function unpause() public onlyOwner {
         paused = false;
         emit PauseEvent(msg.sender, paused);
+    }
+
+    /**
+    * @dev set the deadline, only by owner.
+    */
+    function setDeadline(uint256 _deadline) public onlyOwner {
+        require(_deadline > block.timestamp, "Invalid _deadline");
+        uint256 oldDeadline = deadline;
+        deadline = _deadline;
+        emit SetDeadLineEvent(msg.sender, oldDeadline, _deadline);
     }
 }
