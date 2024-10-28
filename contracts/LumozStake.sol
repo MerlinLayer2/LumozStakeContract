@@ -90,7 +90,7 @@ contract LumozStake is OwnableUpgradeable {
     */
     function stake(uint256 _amount) external whenNotPaused nonReentrant {
         require(_amount >= ONE_MERL, "At least 1 MERL");
-        require(block.timestamp <= deadline, "The staking activity is over");
+        require(block.timestamp < deadline, "The staking activity is over");
 
         address account = msg.sender;
         userStakeAmount[account] += _amount;
